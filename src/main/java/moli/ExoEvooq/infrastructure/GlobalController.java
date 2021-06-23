@@ -6,13 +6,15 @@ import moli.ExoEvooq.vue.ClientDTO;
 import moli.ExoEvooq.wrapper.WrapperDTOtoEntity;
 import moli.ExoEvooq.wrapper.WrapperEntityToDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Controller
 public class GlobalController {
 
     @Autowired
@@ -25,23 +27,38 @@ public class GlobalController {
     private ClientService clientService;
 
 
-    @GetMapping(path = "clients/{name}")
-    public ClientDTO getClientPerName(@PathVariable(value = "name") String name) {
-        Optional<ClientEntity> client = clientRepoHibernate.findByName(name);
-        ClientEntity clientEntity = client.get();
-        ClientDTO clientDTO = wrapperEntityToDTO.clientEntityToClientDTO(clientEntity);
-        return clientDTO;
+    @GetMapping("/accueil")
+    public ModelAndView accueil() {
+        return new ModelAndView("accueil");
     }
 
-    @GetMapping(path = "clients")
-    public List<ClientDTO> getClients() {
+    @GetMapping(path = "/clients")
+    public ModelAndView getClients() {
         List<ClientDTO> clientDTOList = new ArrayList<>();
         List<ClientEntity> clientEntityList = clientRepoHibernate.findAll();
         for (ClientEntity clientEntity : clientEntityList) {
             clientDTOList.add(wrapperEntityToDTO.clientEntityToClientDTO(clientEntity));
         }
-        return clientDTOList;
+
+        ModelAndView modelAndView = new ModelAndView("clients");
+        modelAndView.addObject("clients", clientDTOList);
+        return modelAndView;
+       // return clientDTOList;
     }
+
+    @GetMapping(path = "clients/{name}")
+    public ModelAndView getClientPerName(@PathVariable String name) {
+        Optional<ClientEntity> client = clientRepoHibernate.findByName(name);
+        ClientEntity clientEntity = client.get();
+        ClientDTO clientDTO = wrapperEntityToDTO.clientEntityToClientDTO(clientEntity);
+
+        ModelAndView modelAndView = new ModelAndView("Choix");
+        modelAndView.addObject("client", clientDTO);
+        return modelAndView;
+
+    }
+
+/*
 
     @PostMapping(path = "/createClient")
     public void createClient(@RequestBody ClientDTO clientDTO) {
@@ -59,6 +76,10 @@ public class GlobalController {
         ClientEntity clientEntity = clientRepoHibernate.findByName(name).get();
         clientRepoHibernate.delete(clientEntity);
     }
+ * /
 
 
+
+
+    */
 }
